@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Ecell MET - Entrepreneurship Cell",
   description: "Fostering innovation and entrepreneurship at MET Institute of Technology, Nashik",
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

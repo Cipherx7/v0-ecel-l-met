@@ -15,6 +15,10 @@ export default function Home() {
   const carouselRef = useRef(null)
   const [isPaused, setIsPaused] = useState(false)
 
+  // Add touch handling state
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+
   // Sponsor logos data
   const sponsorLogos = [
     {
@@ -136,6 +140,31 @@ export default function Home() {
     }
   }
 
+  // Add touch event handlers for the sponsor slider
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX)
+    setIsPaused(true)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    // Add haptic feedback if available
+    if (navigator.vibrate && (isLeftSwipe || isRightSwipe)) {
+      navigator.vibrate(50)
+    }
+
+    setTimeout(() => setIsPaused(false), 1000)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Navbar />
@@ -185,49 +214,158 @@ export default function Home() {
             className="sponsor-slider overflow-hidden"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <div
-              className={`flex items-center space-x-8 md:space-x-12 overflow-hidden whitespace-nowrap ${
-                !isPaused ? "animate-scroll" : ""
-              }`}
-              style={{ display: "flex", flexWrap: "nowrap" }}
+              className={`flex items-center space-x-6 md:space-x-12 ${!isPaused ? "animate-scroll" : ""}`}
+              style={{
+                display: "flex",
+                flexWrap: "nowrap",
+                transform: "translateZ(0)", // Hardware acceleration
+              }}
             >
-              {/* First set of logos */}
-              {sponsorLogos.map((sponsor) => (
+              {/* Optimized sponsor logos with better mobile performance */}
+              {[...sponsorLogos, ...sponsorLogos, ...sponsorLogos].map((sponsor, index) => (
                 <a
-                  key={sponsor.id}
+                  key={`${sponsor.id}-${index}`}
                   href={sponsor.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-16 w-32 flex-shrink-0 items-center justify-center p-2 transition-transform hover:scale-110"
+                  className="inline-flex h-12 md:h-16 w-24 md:w-32 flex-shrink-0 items-center justify-center p-1 md:p-2 transition-transform duration-200 hover:scale-110 active:scale-95"
                 >
                   <Image
                     src={sponsor.image || "/placeholder.svg"}
                     alt={sponsor.name}
                     width={120}
                     height={60}
-                    className="max-h-12 w-auto object-contain"
+                    className="max-h-8 md:max-h-12 w-auto object-contain"
+                    loading="lazy"
+                    quality={75}
                   />
                 </a>
               ))}
-              {/* Duplicate logos for seamless looping */}
-              {sponsorLogos.map((sponsor) => (
-                <a
-                  key={`duplicate-${sponsor.id}`}
-                  href={sponsor.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-16 w-32 flex-shrink-0 items-center justify-center p-2 transition-transform hover:scale-110"
-                >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsor Testimonials Section */}
+      <section className="bg-gradient-to-b from-black to-gray-900 py-16 text-white">
+        <div className="container mx-auto px-4">
+          <h3 className="mb-12 text-center text-2xl font-bold md:text-3xl">
+            What Our <span className="text-red-600">Partners</span> Say
+          </h3>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {/* Diginotice Testimonial */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 backdrop-blur-sm backdrop-filter transition-all hover:scale-105">
+              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-red-600/5"></div>
+
+              {/* Quote Icon */}
+              <div className="mb-4 flex justify-start">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600/20">
+                  <span className="text-lg font-bold text-red-600">"</span>
+                </div>
+              </div>
+
+              {/* Testimonial Text */}
+              <p className="mb-6 text-gray-300 italic leading-relaxed">
+                "Partnering with Ecell MET has been an incredible journey. Their students bring fresh perspectives and
+                innovative solutions that have genuinely impacted our business growth. The entrepreneurial spirit here
+                is truly inspiring."
+              </p>
+
+              {/* Sponsor Info */}
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
                   <Image
-                    src={sponsor.image || "/placeholder.svg"}
-                    alt={sponsor.name}
-                    width={120}
-                    height={60}
-                    className="max-h-12 w-auto object-contain"
+                    src="https://cdn-jahhp.nitrocdn.com/eyUnlCtmccdDgOgzcAyDPkfcHyEYWkMu/assets/images/optimized/rev-1279416/diginotice.in/wp-content/uploads/2023/02/Diginotice-New-Logo-2023.png"
+                    alt="Diginotice"
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 object-contain"
                   />
-                </a>
-              ))}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white">Diginotice</h4>
+                  <p className="text-sm text-gray-400">Digital Solutions Partner</p>
+                </div>
+              </div>
+            </div>
+
+            {/* TechSavvy Testimonial */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 backdrop-blur-sm backdrop-filter transition-all hover:scale-105">
+              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-red-600/5"></div>
+
+              {/* Quote Icon */}
+              <div className="mb-4 flex justify-start">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600/20">
+                  <span className="text-lg font-bold text-red-600">"</span>
+                </div>
+              </div>
+
+              {/* Testimonial Text */}
+              <p className="mb-6 text-gray-300 italic leading-relaxed">
+                "The collaboration with Ecell MET has opened doors to exceptional talent. Their events and workshops
+                create a perfect platform for us to connect with future innovators and entrepreneurs."
+              </p>
+
+              {/* Sponsor Info */}
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
+                  <span className="text-xs font-bold text-red-600">TS</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white">TechSavvy</h4>
+                  <p className="text-sm text-gray-400">Technology Partner</p>
+                </div>
+              </div>
+            </div>
+
+            {/* InnovateX Testimonial */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 backdrop-blur-sm backdrop-filter transition-all hover:scale-105">
+              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-red-600/5"></div>
+
+              {/* Quote Icon */}
+              <div className="mb-4 flex justify-start">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600/20">
+                  <span className="text-lg font-bold text-red-600">"</span>
+                </div>
+              </div>
+
+              {/* Testimonial Text */}
+              <p className="mb-6 text-gray-300 italic leading-relaxed">
+                "Ecell MET's commitment to fostering entrepreneurship aligns perfectly with our mission. Supporting
+                their initiatives has been rewarding, and we've witnessed remarkable startup ideas emerge from this
+                community."
+              </p>
+
+              {/* Sponsor Info */}
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
+                  <span className="text-xs font-bold text-red-600">IX</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white">InnovateX</h4>
+                  <p className="text-sm text-gray-400">Innovation Partner</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action for Potential Partners */}
+          <div className="mt-12 text-center">
+            <div className="mx-auto max-w-2xl rounded-xl bg-gradient-to-r from-red-600/10 to-red-800/10 p-8 backdrop-blur-sm">
+              <h4 className="mb-4 text-xl font-bold">Interested in Partnering with Us?</h4>
+              <p className="mb-6 text-gray-300">
+                Join our growing network of partners and be part of the entrepreneurial revolution at MET Institute of
+                Technology.
+              </p>
+              <Button asChild className="bg-red-600 hover:bg-red-700">
+                <Link href="/connect">Become a Partner</Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -57,12 +57,13 @@ body {
     transform: translateX(0);
   }
   to {
-    transform: translateX(calc(-100% - 3rem));
+    transform: translateX(calc(-50% - 1rem));
   }
 }
 
 .animate-scroll {
-  animation: scroll 30s linear infinite;
+  animation: scroll 25s linear infinite;
+  will-change: transform;
 }
 
 /* 3D Carousel Styles */
@@ -129,10 +130,29 @@ body {
 /* Ensure the sponsor logos are visible on mobile */
 @media (max-width: 768px) {
   .animate-scroll {
-    animation-duration: 15s; /* Faster animation on mobile */
+    animation-duration: 20s;
+    animation-timing-function: ease-in-out;
+  }
+
+  .sponsor-slider {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-scroll {
+      animation-duration: 40s;
+    }
   }
 }
 
+/* Hardware acceleration for better performance */
+.sponsor-slider .animate-scroll {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
 /* Body scroll lock when mobile menu is open */
 body.menu-open {
   overflow: hidden;
